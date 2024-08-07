@@ -1092,10 +1092,12 @@ void deleteroot(struct node*root,int flag)
 {
     if(root)
     {
+        
         if(root->flag==0)
         {
             for(int i=0;i<root->size;i++)
             {
+                
                 deleteroot(root->u.next1[i],flag);
                 free(root->u.next1[i]);
                 root->u.next1[i]=NULL;
@@ -1107,11 +1109,12 @@ void deleteroot(struct node*root,int flag)
             {
                 for(int i=0;i<root->size;i++)
                 {
+                  //  printf("t");
                     struct datanode*nptr=root->u.next2[i];
                     for(int j=0;j<nptr->size;j++)
                     {
                         free(nptr->data[j]->item_name);
-                        free(nptr->data[i]);
+                        free(nptr->data[j]);
                     }
                     free(root->u.next2[i]);
                     root->u.next2[i]=NULL;
@@ -1637,7 +1640,7 @@ struct node*construct(int size,struct aisle_node*arr[size],struct node*arr1[size
             ++count;
         }
         struct node*val=(struct node*)malloc(sizeof(struct node));
-        val->size=num2;
+        val->size=num2-1;
         val->flag=0;
         int i=(num1-1)*temp1,j=0;
         while(j<num2)
@@ -1645,7 +1648,12 @@ struct node*construct(int size,struct aisle_node*arr[size],struct node*arr1[size
             val->u.next1[j]=arr1[j+i];
             if(j!=0)
             {
-                val->data[j-1]=arr1[i+j]->data[0];
+                struct node*t=arr1[i+j];
+                while(t->flag==0)
+                {
+                    t=t->u.next1[0];
+                }
+                val->data[j-1]=t->u.next2[0]->data[0]->item_id;
             }
             j++;
         }
@@ -1974,10 +1982,12 @@ char**initializeaislename(unsigned int size)
 }
 void deallocmemory(unsigned int size,struct node*arr[size],unsigned int size1,unsigned int*datamine[size1],char*aislename[size],struct node*bptr)
 {
-    for(int i=0;i<size;i++)
+    for(unsigned int i=0;i<size;i++)
     {
+      //  printf("a");
         if(arr[i])
         {
+         //   printf("a");
             deleteroot(arr[i],0);
             arr[i]=NULL;
         }
@@ -2010,7 +2020,7 @@ void deallocmemory(unsigned int size,struct node*arr[size],unsigned int size1,un
         free(aislename);
         aislename=NULL;
     }
-    deleteroot(bptr,2);
+    if(bptr)deleteroot(bptr,2);
     bptr=NULL;
 }
 void main()
@@ -2030,9 +2040,27 @@ void main()
     arr=initializeaisle(size);
     datamine=initializemine(size1);
     aislename=initializeaislename(size);
-    ++aislecnt;
+ //   ++aislecnt;
     while(flag<=1)
     {
+        if(flag==1)
+        {
+            for(int i=0;i<aislecnt;i++)
+            {
+             //   printf("%d",aislecnt);
+                struct node*temp=arr[i];
+                while(temp->flag==0)
+                {
+                    temp=temp->u.next1[0];
+                }
+                struct aisle_node**arrt=NULL;
+                int s=0;
+                arrt=merge(temp->u.next2[1],NULL,&s);
+                arr[i]=construct(s,arrt,NULL);
+              //  printf("%d",arr[i]->data[0]);
+               // if(arr[i])printf("a");
+            }
+        }
         do
         {
             if(flag>0)
@@ -2128,9 +2156,13 @@ void main()
             }*/
         }while(c);
         ++flag;
-    }//arr[0]->u.next1[1]->u.next1[1]->u.next1[2]->u.next2[2]->data[1]->item_id
+    }
+ //   printf("%d %d %d %d %d",arr[0]->size,arr[1]->size,arr[2]->size,arr[3]->size,arr[4]->size);
+ //   printf("main");//arr[0]->u.next1[1]->u.next1[1]->u.next1[2]->u.next2[2]->data[1]->item_id
+ //   printf("%d",arr[1]->data[1]);
+  //  printf("%d",arr[1]->u.next1[0]->u.next2[0]->data[0]->item_id);
  //   printf("%u",bptr->u.next4[1]->arr[0]->u.next1[0]->u.next1[0]->u.next1[0]->u.next3[1]->arr[0]->item_id);
-    deallocmemory(size,arr,size1,datamine,aislename,bptr);
+    deallocmemory(aislecnt,arr,idgen,datamine,aislename,bptr);
     fclose(fp);
 }
 /*  struct node*root[5]={NULL};
